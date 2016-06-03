@@ -45,7 +45,7 @@ $hash = '';
 
 // Hash Sequence
 
-$hashSequence = "program|firstname|email|address|phone|tickets|program|udf1|udf2|udf3|udf4|udf5";
+$hashSequence = "program|firstname|email|address|phone|tickets|program|udf1";
 if( empty($posted['firstname'])
 	|| empty($posted['email'])
 	|| empty($posted['address'])

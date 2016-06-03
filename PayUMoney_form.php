@@ -43,9 +43,8 @@ $formError = 0;
 
 $hash = '';
 
-// Hash Sequence
-
-$hashSequence = "firstname|email|address|phone|tickets|udf1";
+// Hash Sequence 
+$hashSequence = "firstname|email|address|phone|tickets|udf1|udf2|udf3|udf4|udf5|udf6|udf7";
 if( empty($posted['firstname'])
 	|| empty($posted['email'])
 	|| empty($posted['address'])
@@ -75,8 +74,8 @@ if( empty($posted['firstname'])
 	$hash_string .= $MERCHANT_KEY . "|";
 	$hash_string .= $txnid . "|";
 	$hash_string .= number_format($cost, 2, '.', ''). "|";
-	$hash_string .= $productinfo . "|";
-
+	$hash_string .= $posted['program'] . "|";
+	
 	foreach($hashVarsSeq as $hash_var) {
 		$hash_string .= isset($posted[$hash_var]) ? $posted[$hash_var] : '';
 		$hash_string .= '|';
@@ -87,6 +86,7 @@ if( empty($posted['firstname'])
 	$hash = strtolower(hash('sha512', $hash_string));
 	$action = $PAYU_BASE_URL . '/_payment';
 }
+
 echo "
 <html>
 <head>
@@ -97,12 +97,15 @@ echo "
 	{
 		key: '"; echo $MERCHANT_KEY; echo "',
 		txnid: '"; echo $txnid; echo "',
-		amount: '"; echo $cost; echo "',
+		amount: '"; echo number_format($cost, 2, '.', ''); echo "',
 		productinfo : '"; echo $posted['program']; echo "',
 		firstname : '"; echo $posted['firstname']; echo "',
 		lastname : '"; echo $posted['lastname']; echo "',
 		email : '"; echo $posted['email']; echo "',
 		phone : '"; echo $posted['phone']; echo "',
+		udf1 : '"; echo $posted['address']; echo "',
+		udf2 : '"; echo $posted['phone']; echo "',
+		udf3 : '"; echo $posted['tickets']; echo "',
 		surl: '" ; echo $surl; echo "',
 		furl: '"; echo $furl; echo "',
 		hash: '"; echo $hash; echo "',

@@ -16,6 +16,7 @@ $programs = array(
 );
 
 $cost = 15000;
+
 foreach ( $programs as $key => $value ) {
 	if ( $posted['program'] == $key ) {
 		$cost = $value* $posted['tickets'];
@@ -34,7 +35,7 @@ $MERCHANT_KEY = "HLsaVbv7";
 $SALT = "FB7qaCPsiX";
 
 // End point - change to https://secure.payu.in for LIVE mode
-$PAYU_BASE_URL = "https://test.payu.in";
+$PAYU_BASE_URL = "https://secure.payu.in";
 $surl = "https://payment.inctf.in/success.php";
 $furl = "https://payment.inctf.in/failure.php";
 
@@ -44,7 +45,7 @@ $hash = '';
 
 // Hash Sequence
 
-$hashSequence = "program|firstname|email|address|phone|tickets|program|udf1|udf2|udf3|udf4|udf5|udf6";
+$hashSequence = "program|firstname|email|address|phone|tickets|program|udf1|udf2|udf3|udf4|udf5";
 if( empty($posted['firstname'])
 	|| empty($posted['email'])
 	|| empty($posted['address'])
@@ -55,6 +56,7 @@ if( empty($posted['firstname'])
 	echo "bad post";
 
 } else {
+
 	//$posted['productinfo'] = json_encode(json_decode('[{"name":"tutionfee","description":"","value":"500","isRequired":"false"},{"name":"developmentfee","description":"monthly tution fee","value":"1500","isRequired":"false"}]'));
 	$hashVarsSeq = explode('|', $hashSequence);
 	$hash_string = '';
@@ -66,6 +68,7 @@ if( empty($posted['firstname'])
 		$hash_string .= isset($posted[$hash_var]) ? $posted[$hash_var] : '';
 		$hash_string .= '|';
 	}
+
 	$hash_string .= $SALT;
 
 	$hash = strtolower(hash('sha512', $hash_string));
@@ -77,7 +80,7 @@ echo "
 <script src='js/jquery-1.12.4.min.js'> </script>
 <script src='js/jquery.redirect.js'> </script>
 	<script type='text/javascript'>
-	$.redirect( 'https://test.payu.in/_payment',
+	$.redirect( 'https://secure.payu.in/_payment',
 	{
 		key: '"; echo $MERCHANT_KEY; echo "',
 		txnid: '"; echo $txnid; echo "',

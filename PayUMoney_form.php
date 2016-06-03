@@ -1,4 +1,32 @@
 <?php
+$posted = array();
+if(!empty($_POST)) {
+	//print_r($_POST);
+	foreach($_POST as $key => $value) {
+		$posted[$key] = $value;
+	}
+}
+
+$number_of_tickets = $posted['tickets'];
+$programs = array(
+	"Early Bird Academic ₹10,000" => 10000,
+	"Early Bird Professionals ₹15,000" => 15000,
+	"Early Bird Startups ₹8,500" => 8500
+
+);
+
+$cost = 15000;
+foreach ( $programs as $key => $value ) {
+	if ( $posted['program'] == $key ) {
+		$cost = $value* $posted['tickets'];
+		if ( $posted['tickets'] > 0 and $posted['tickets'] > 3) {
+			$cost = $cost - $cost * 0.20;
+		}
+	}
+}
+
+$txnid = substr(hash('sha256', mt_rand() . microtime()), 0, 20);
+
 // Merchant key here as provided by Payu
 $MERCHANT_KEY = "JBZaLc";
 
@@ -7,173 +35,65 @@ $SALT = "GQs7yium";
 
 // End point - change to https://secure.payu.in for LIVE mode
 $PAYU_BASE_URL = "https://test.payu.in";
-
-$action = '';
-
-$posted = array();
-if(!empty($_POST)) {
-    //print_r($_POST);
-  foreach($_POST as $key => $value) {    
-    $posted[$key] = $value; 
-	
-  }
-}
+$surl = "http://localhost/payments/payment-summer/success.php";
+$furl = "http://localhost/payments/payment-summer/failure.php";
+$key = "test";
 
 $formError = 0;
 
-if(empty($posted['txnid'])) {
-  // Generate random transaction id
-  $txnid = substr(hash('sha256', mt_rand() . microtime()), 0, 20);
-} else {
-  $txnid = $posted['txnid'];
-}
 $hash = '';
+
 // Hash Sequence
-$hashSequence = "key|txnid|amount|productinfo|firstname|email|udf1|udf2|udf3|udf4|udf5|udf6|udf7|udf8|udf9|udf10";
-if(empty($posted['hash']) && sizeof($posted) > 0) {
-  if(
-          empty($posted['key'])
-          || empty($posted['txnid'])
-          || empty($posted['amount'])
-          || empty($posted['firstname'])
-          || empty($posted['email'])
-          || empty($posted['phone'])
-          || empty($posted['productinfo'])
-          || empty($posted['surl'])
-          || empty($posted['furl'])
-		  || empty($posted['service_provider'])
-  ) {
-    $formError = 1;
-  } else {
-    //$posted['productinfo'] = json_encode(json_decode('[{"name":"tutionfee","description":"","value":"500","isRequired":"false"},{"name":"developmentfee","description":"monthly tution fee","value":"1500","isRequired":"false"}]'));
+
+$hashSequence = "program|firstname|email|address|phone|tickets|program|udf1|udf2|udf3|udf4|udf5|udf6";
+if( empty($posted['firstname'])
+	|| empty($posted['email'])
+	|| empty($posted['address'])
+	|| empty($posted['phone'])
+	|| empty($posted['tickets'])
+	|| empty($posted['program']) )
+{
+	echo "bad post";
+
+} else {
+	//$posted['productinfo'] = json_encode(json_decode('[{"name":"tutionfee","description":"","value":"500","isRequired":"false"},{"name":"developmentfee","description":"monthly tution fee","value":"1500","isRequired":"false"}]'));
 	$hashVarsSeq = explode('|', $hashSequence);
-    $hash_string = '';	
+	$hash_string = '';
+	$hash_string .= $MERCHANT_KEY . "|";
+	$hash_string .= $txnid . "|";
+	$hash_string .= $cost. "|";
+
 	foreach($hashVarsSeq as $hash_var) {
-      $hash_string .= isset($posted[$hash_var]) ? $posted[$hash_var] : '';
-      $hash_string .= '|';
-    }
+		$hash_string .= isset($posted[$hash_var]) ? $posted[$hash_var] : '';
+		$hash_string .= '|';
+	}
+	$hash_string .= $SALT;
 
-    $hash_string .= $SALT;
-
-
-    $hash = strtolower(hash('sha512', $hash_string));
-    $action = $PAYU_BASE_URL . '/_payment';
-  }
-} elseif(!empty($posted['hash'])) {
-  $hash = $posted['hash'];
-  $action = $PAYU_BASE_URL . '/_payment';
+	$hash = strtolower(hash('sha512', $hash_string));
+	$action = $PAYU_BASE_URL . '/_payment';
 }
-?>
+echo "
 <html>
-  <head>
-  <script>
-    var hash = '<?php echo $hash ?>';
-    function submitPayuForm() {
-      if(hash == '') {
-        return;
-      }
-      var payuForm = document.forms.payuForm;
-      payuForm.submit();
-    }
-  </script>
-  </head>
-  <body onload="submitPayuForm()">
-    <h2>PayU Form</h2>
-    <br/>
-    <?php if($formError) { ?>
-	
-      <span style="color:red">Please fill all mandatory fields.</span>
-      <br/>
-      <br/>
-    <?php } ?>
-    <form action="<?php echo $action; ?>" method="post" name="payuForm">
-      <input type="hidden" name="key" value="<?php echo $MERCHANT_KEY ?>" />
-      <input type="hidden" name="hash" value="<?php echo $hash ?>"/>
-      <input type="hidden" name="txnid" value="<?php echo $txnid ?>" />
-      <table>
-        <tr>
-          <td><b>Mandatory Parameters</b></td>
-        </tr>
-        <tr>
-          <td>Amount: </td>
-          <td><input name="amount" value="<?php echo (empty($posted['amount'])) ? '' : $posted['amount'] ?>" /></td>
-          <td>First Name: </td>
-          <td><input name="firstname" id="firstname" value="<?php echo (empty($posted['firstname'])) ? '' : $posted['firstname']; ?>" /></td>
-        </tr>
-        <tr>
-          <td>Email: </td>
-          <td><input name="email" id="email" value="<?php echo (empty($posted['email'])) ? '' : $posted['email']; ?>" /></td>
-          <td>Phone: </td>
-          <td><input name="phone" value="<?php echo (empty($posted['phone'])) ? '' : $posted['phone']; ?>" /></td>
-        </tr>
-        <tr>
-          <td>Product Info: </td>
-          <td colspan="3"><textarea name="productinfo"><?php echo (empty($posted['productinfo'])) ? '' : $posted['productinfo'] ?></textarea></td>
-        </tr>
-        <tr>
-          <td>Success URI: </td>
-          <td colspan="3"><input name="surl" value="<?php echo (empty($posted['surl'])) ? '' : $posted['surl'] ?>" size="64" /></td>
-        </tr>
-        <tr>
-          <td>Failure URI: </td>
-          <td colspan="3"><input name="furl" value="<?php echo (empty($posted['furl'])) ? '' : $posted['furl'] ?>" size="64" /></td>
-        </tr>
-
-        <tr>
-          <td colspan="3"><input type="hidden" name="service_provider" value="payu_paisa" size="64" /></td>
-        </tr>
-
-        <tr>
-          <td><b>Optional Parameters</b></td>
-        </tr>
-        <tr>
-          <td>Last Name: </td>
-          <td><input name="lastname" id="lastname" value="<?php echo (empty($posted['lastname'])) ? '' : $posted['lastname']; ?>" /></td>
-          <td>Cancel URI: </td>
-          <td><input name="curl" value="" /></td>
-        </tr>
-        <tr>
-          <td>Address1: </td>
-          <td><input name="address1" value="<?php echo (empty($posted['address1'])) ? '' : $posted['address1']; ?>" /></td>
-          <td>Address2: </td>
-          <td><input name="address2" value="<?php echo (empty($posted['address2'])) ? '' : $posted['address2']; ?>" /></td>
-        </tr>
-        <tr>
-          <td>City: </td>
-          <td><input name="city" value="<?php echo (empty($posted['city'])) ? '' : $posted['city']; ?>" /></td>
-          <td>State: </td>
-          <td><input name="state" value="<?php echo (empty($posted['state'])) ? '' : $posted['state']; ?>" /></td>
-        </tr>
-        <tr>
-          <td>Country: </td>
-          <td><input name="country" value="<?php echo (empty($posted['country'])) ? '' : $posted['country']; ?>" /></td>
-          <td>Zipcode: </td>
-          <td><input name="zipcode" value="<?php echo (empty($posted['zipcode'])) ? '' : $posted['zipcode']; ?>" /></td>
-        </tr>
-        <tr>
-          <td>UDF1: </td>
-          <td><input name="udf1" value="<?php echo (empty($posted['udf1'])) ? '' : $posted['udf1']; ?>" /></td>
-          <td>UDF2: </td>
-          <td><input name="udf2" value="<?php echo (empty($posted['udf2'])) ? '' : $posted['udf2']; ?>" /></td>
-        </tr>
-        <tr>
-          <td>UDF3: </td>
-          <td><input name="udf3" value="<?php echo (empty($posted['udf3'])) ? '' : $posted['udf3']; ?>" /></td>
-          <td>UDF4: </td>
-          <td><input name="udf4" value="<?php echo (empty($posted['udf4'])) ? '' : $posted['udf4']; ?>" /></td>
-        </tr>
-        <tr>
-          <td>UDF5: </td>
-          <td><input name="udf5" value="<?php echo (empty($posted['udf5'])) ? '' : $posted['udf5']; ?>" /></td>
-          <td>PG: </td>
-          <td><input name="pg" value="<?php echo (empty($posted['pg'])) ? '' : $posted['pg']; ?>" /></td>
-        </tr>
-        <tr>
-          <?php if(!$hash) { ?>
-            <td colspan="4"><input type="submit" value="Submit" /></td>
-          <?php } ?>
-        </tr>
-      </table>
-    </form>
-  </body>
+<head>
+<script src='js/jquery-1.12.4.min.js'> </script>
+<script src='js/jquery.redirect.js'> </script>
+	<script type='text/javascript'>
+	$.redirect( 'https://test.payu.in/_payment',
+	{
+		key: '"; echo $MERCHANT_KEY; echo "',
+		txnid: '"; echo $txnid; echo "',
+		amount: '"; echo $cost; echo "',
+		productinfo : '"; echo $posted['program']; echo "',
+		firstname : '"; echo $posted['firstname']; echo "',
+		lastname : '"; echo $posted['lastname']; echo "',
+		email : '"; echo $posted['email']; echo "',
+		phone : '"; echo $posted['phone']; echo "',
+		surl: '" ; echo $surl; echo "',
+		furl: '"; echo $furl; echo "',
+		hash: '"; echo $hash; echo "',
+		service_provider :'payu_paisa',
+	});
+	</script>
+</head>
 </html>
+"; ?>

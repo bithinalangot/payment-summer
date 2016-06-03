@@ -28,16 +28,15 @@ foreach ( $programs as $key => $value ) {
 $txnid = substr(hash('sha256', mt_rand() . microtime()), 0, 20);
 
 // Merchant key here as provided by Payu
-$MERCHANT_KEY = "JBZaLc";
+$MERCHANT_KEY = "HLsaVbv7";
 
 // Merchant Salt as provided by Payu
-$SALT = "GQs7yium";
+$SALT = "FB7qaCPsiX";
 
 // End point - change to https://secure.payu.in for LIVE mode
 $PAYU_BASE_URL = "https://test.payu.in";
-$surl = "http://localhost/payments/payment-summer/success.php";
-$furl = "http://localhost/payments/payment-summer/failure.php";
-$key = "test";
+$surl = "https://payment.inctf.in/success.php";
+$furl = "https://payment.inctf.in/failure.php";
 
 $formError = 0;
 

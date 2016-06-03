@@ -45,7 +45,7 @@ $hash = '';
 
 // Hash Sequence
 
-$hashSequence = "program|firstname|email|address|phone|tickets|program|udf1";
+$hashSequence = "firstname|email|address|phone|tickets|udf1";
 if( empty($posted['firstname'])
 	|| empty($posted['email'])
 	|| empty($posted['address'])
@@ -56,13 +56,26 @@ if( empty($posted['firstname'])
 	echo "bad post";
 
 } else {
+	$productsInfo = array(
+		'paymentParts' => array(
+			'name' => "Security Annual Conference 2016",
+			'description' => $posted['program'],
+			'value' => $cost,
+			'isRequired' => 'true'
+		),
+		'paymentIdentifiers' => array(
+			'field' => "txnId",
+			'value' => $txnid
+		)
+	);
 
-	//$posted['productinfo'] = json_encode(json_decode('[{"name":"tutionfee","description":"","value":"500","isRequired":"false"},{"name":"developmentfee","description":"monthly tution fee","value":"1500","isRequired":"false"}]'));
+	$productinfo = json_encode($productsInfo);
 	$hashVarsSeq = explode('|', $hashSequence);
 	$hash_string = '';
 	$hash_string .= $MERCHANT_KEY . "|";
 	$hash_string .= $txnid . "|";
-	$hash_string .= $cost. "|";
+	$hash_string .= number_format($cost, 2, '.', ''). "|";
+	$hash_string .= $productinfo . "|";
 
 	foreach($hashVarsSeq as $hash_var) {
 		$hash_string .= isset($posted[$hash_var]) ? $posted[$hash_var] : '';

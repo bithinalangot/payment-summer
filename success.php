@@ -3,7 +3,7 @@
 
 <head>
 	<meta charset="utf-8">
-	<title>The Annual Conference</title>
+	<title>Summer School Registration</title>
 
 	<meta name="keywords" content="" />
 	<meta name="description" content="" />
@@ -62,7 +62,7 @@
 <div class="registration" style="padding-top:5%">
 	<div class="container">
 
-		<h2>Conference Registration</h2>
+		<h2>Summer School Registration</h2>
 		<p class="subtitle"><strong>We have your transaction.</strong> We  will be in touch with you soon :)</p>
 
 

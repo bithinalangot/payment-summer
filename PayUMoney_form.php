@@ -7,10 +7,12 @@ if(!empty($_POST)) {
 	}
 }
 
+echo $posted['program'];
+
 $number_of_tickets = $posted['tickets'];
 $programs = array(
-	"Early Bird Academic ₹10,000" => 10000,
-	"Early Bird Professionals ₹15,000" => 15000,
+	"Academic 10,000" => 10000,
+	"Professionals 15,000" => 15000,
 	"Early Bird Startups ₹8,500" => 8500
 
 );

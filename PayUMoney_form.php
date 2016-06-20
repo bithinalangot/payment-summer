@@ -7,7 +7,7 @@ if(!empty($_POST)) {
 	}
 }
 
-echo $posted['program'];
+echo "Proceeding to payment....";
 
 $number_of_tickets = $posted['tickets'];
 $programs = array(
